@@ -22,18 +22,15 @@ let cache = { global: {}, bin: {} };
 
 bot.on('/start', (msg) => {
   msg.reply.text(
-    '/info <symbol> for information on the coin with that ticker symbol\n' +
-      '/info <rank> for information on the coin with that rank\n' +
-      '/global for total market information\n' +
-      '/<ticker> for latest Binance ticker price\n' +
-      '/chart <name> for chart on historical prices on the coin with that name'
+    '/price for current price of Macaron (MCRN)\n' +
+    '/info for information Macaron (MCRN)\n'
   );
 });
 
 // Ticker information from CoinMarketCap
-bot.on(/^\/info (.+)$/i, async (msg, props) => {
+bot.on(/^\/info$/i, async (msg) => {
   updateCalls(msg);
-  const text = props.match[1].substring(5);
+  const text = 'MCRN';
   // Checks if the same argument has been passed into the command in the last 5 minutes
   if (cache[text] && isValidCache(cache[text], cache[text].last_updated)) {
     return msg.reply.text(formatInfo(cache[text]), { asReply: true });
@@ -57,6 +54,37 @@ bot.on(/^\/info (.+)$/i, async (msg, props) => {
         const data = info.data[0];
         cache[text] = data;
         return msg.reply.text(formatInfo(data), { asReply: true });
+      });
+    }
+  }
+});
+
+bot.on(/^\/price$/i, async (msg) => {
+  updateCalls(msg);
+  const text = 'MCRN';
+  // Checks if the same argument has been passed into the command in the last 5 minutes
+  if (cache[text] && isValidCache(cache[text], cache[text].last_updated)) {
+    return msg.reply.text(formatPrice(cache[text]), { asReply: true });
+  } else {
+    if (isNaN(text)) {
+      const symbol = text.toUpperCase();
+      cmcClient.getQuotes({ symbol: symbol }).then((info) => {
+        console.log(info);
+        if (!('data' in info && symbol in info.data))
+          return msg.reply.text(NO_CURRENCY, { asReply: true });
+        const data = info.data[symbol];
+        cache[symbol] = data;
+        return msg.reply.text(formatPrice(data), { asReply: true });
+      });
+    } else {
+      const rank = parseInt(text);
+      if (rank === 0) return msg.reply.text(RANK_NOT_IN_RANGE, { asReply: true });
+      cmcClient.getTickers({ start: rank, limit: 1 }).then((info) => {
+        console.log(info);
+        if (info.data.length === 0) return msg.reply.text(NO_CURRENCY_RANK, { asReply: true });
+        const data = info.data[0];
+        cache[text] = data;
+        return msg.reply.text(formatPrice(data), { asReply: true });
       });
     }
   }
@@ -97,10 +125,6 @@ bot.on(/^\/(.+)$/i, async (msg, props) => {
   }
 });
 
-bot.on(/^\/chart (.+)$/i, (msg) => {
-  return msg.reply.text(DEPRECATED, { asReply: true });
-});
-
 bot.start();
 
 // Formats the output of the json for better readability
@@ -119,6 +143,25 @@ function formatInfo(info) {
   if (info.max_supply) {
     output += 'Maximum Supply: ' + formatNum(info.max_supply) + '\n';
   }
+
+  output += '\nChange 1h: ' + formatNum(priceInfo.percent_change_1h) + '%\n';
+  if ('percent_change_24h' in priceInfo) {
+    output += 'Change 24h: ' + formatNum(priceInfo.percent_change_24h) + '%\n';
+  }
+  if ('percent_change_7d' in priceInfo) {
+    output += 'Change 7d: ' + formatNum(priceInfo.percent_change_7d) + '%\n';
+  }
+  output += '\n';
+
+  return output + 'Last Updated: ' + new Date(info.last_updated).toString();
+}
+
+// Formats the output of the json for better readability
+function formatPrice(info) {
+  let output = info.name + ' (' + info.symbol + ')\n';
+
+  const priceInfo = info.quote.USD;
+  output += 'Price USD: $' + formatNum(priceInfo.price) + '\n';
 
   output += '\nChange 1h: ' + formatNum(priceInfo.percent_change_1h) + '%\n';
   if ('percent_change_24h' in priceInfo) {
