@@ -91,6 +91,7 @@ bot.on(/^\/price$/i, async (msg) => {
 });
 
 // Total market information from CoinMarketCap
+/*
 bot.on('/global', async (msg) => {
   updateCalls(msg);
   // Checks if global command has been called in last 5 minutes
@@ -103,8 +104,10 @@ bot.on('/global', async (msg) => {
     return msg.reply.text(formatGlobalInfo(info.data), { asReply: true });
   });
 });
+*/
 
 // Latest exchange price from Binance
+/*
 bot.on(/^\/(.+)$/i, async (msg, props) => {
   const text = props.match[1].toLowerCase();
   if (isValidTickerText(props, text)) {
@@ -124,6 +127,7 @@ bot.on(/^\/(.+)$/i, async (msg, props) => {
     }
   }
 });
+*/
 
 bot.start();
 
