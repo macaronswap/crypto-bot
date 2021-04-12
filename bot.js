@@ -2,6 +2,7 @@ require('dotenv').config();
 const TeleBot = require('telebot');
 const Binance = require('node-binance-api');
 const CoinMarketCap = require('coinmarketcap-api');
+const request = require('request');
 
 const bot = new TeleBot(process.env.TELEGRAM_TOKEN);
 const binance = new Binance({
@@ -23,6 +24,7 @@ let cache = { global: {}, bin: {} };
 bot.on('/start', (msg) => {
   msg.reply.text(
     '/price for current price of Macaron (MCRN)\n' +
+    '/priceCMC for current Coinmarketcap price of Macaron (MCRN)\n' +
     '/info for information Macaron (MCRN)\n'
   );
 });
@@ -59,7 +61,7 @@ bot.on(/^\/info$/i, async (msg) => {
   }
 });
 
-bot.on(/^\/price$/i, async (msg) => {
+bot.on(/^\/priceCMC$/i, async (msg) => {
   updateCalls(msg);
   const text = 'MCRN';
   // Checks if the same argument has been passed into the command in the last 5 minutes
@@ -87,6 +89,23 @@ bot.on(/^\/price$/i, async (msg) => {
         return msg.reply.text(formatPrice(data), { asReply: true });
       });
     }
+  }
+});
+
+bot.on(/^\/price$/i, async (msg) => {
+  updateCalls(msg);
+  const text = '0xacb2d47827C9813AE26De80965845D80935afd0B';
+  // Checks if the same argument has been passed into the command in the last 5 minutes
+  if (cache[text] && isValidCache(cache[text], cache[text].last_updated)) {
+    return msg.reply.text(formatPricePancake(cache[text]), { asReply: true });
+  } else {
+    var info = await fetchPancakeToken(text)
+      console.log(info);
+      if (info == null)
+        return msg.reply.text(NO_CURRENCY, { asReply: true });
+
+      cache[info.symbol] = info;
+      return msg.reply.text(formatPricePancake(info), { asReply: true });
   }
 });
 
@@ -130,6 +149,24 @@ bot.on(/^\/(.+)$/i, async (msg, props) => {
 */
 
 bot.start();
+
+function fetchPancakeToken(address){
+  let url = "https://api.pancakeswap.info/api/tokens";
+
+  let options = {json: true};
+
+  return new Promise((resolve, reject) => {
+    request(url, options, (error, res, body) => {
+        if (error) reject(error);
+        if (res.statusCode != 200) {
+            reject('Invalid status code <' + res.statusCode + '>');
+        }
+
+        let json = JSON.parse(JSON.stringify(body))
+        resolve(json["data"][address])
+    });
+  });
+}
 
 // Formats the output of the json for better readability
 function formatInfo(info) {
@@ -177,6 +214,13 @@ function formatPrice(info) {
   output += '\n';
 
   return output + 'Last Updated: ' + new Date(info.last_updated).toString();
+}
+
+function formatPricePancake(info) {
+  let output = info.name + ' (' + info.symbol + ')\n';
+
+  output += 'Price USD: $' + formatNum(info.price) + '\n';
+  return output + 'Price BNB: ' + info.price_BNB.substring(0, 8) + '\n';
 }
 
 // Formats the output of the json for global CMC data
