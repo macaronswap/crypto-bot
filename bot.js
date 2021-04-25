@@ -151,7 +151,7 @@ bot.on(/^\/(.+)$/i, async (msg, props) => {
 bot.start();
 
 function fetchPancakeToken(address){
-  let url = "https://api.pancakeswap.info/api/tokens";
+  let url = "https://api.pancakeswap.info/api/v2/tokens";
 
   let options = {json: true};
 
