@@ -94,7 +94,7 @@ bot.on(/^\/priceCMC$/i, async (msg) => {
 
 bot.on(/^\/price$/i, async (msg) => {
   updateCalls(msg);
-  const text = '0xacb2d47827C9813AE26De80965845D80935afd0B';
+  const text = '0xacb2d47827C9813AE26De80965845D80935afd0B'.toLowerCase();
   // Checks if the same argument has been passed into the command in the last 5 minutes
   if (cache[text] && isValidCache(cache[text], cache[text].last_updated)) {
     return msg.reply.text(formatPricePancake(cache[text]), { asReply: true });
@@ -151,7 +151,7 @@ bot.on(/^\/(.+)$/i, async (msg, props) => {
 bot.start();
 
 function fetchPancakeToken(address){
-  let url = "https://api.pancakeswap.info/api/v2/tokens";
+  let url = "https://www.macaronswap.finance/api/prices";
 
   let options = {json: true};
 
