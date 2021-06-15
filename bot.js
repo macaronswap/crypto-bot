@@ -45,6 +45,16 @@ bot.on(/^\/info$/i, async (msg) => {
   }
 });
 
+bot.on(/^\/luke$/i, async (msg) => {
+  updateCalls(msg);
+  return msg.reply.text("👀");
+});
+
+bot.on(/^\/macaronchef$/i, async (msg) => {
+  updateCalls(msg);
+  return msg.reply.text("👀");
+});
+
 bot.on(/^\/price$/i, async (msg) => {
   updateCalls(msg);
   const symbolID = "macaronswap";
