@@ -31,6 +31,7 @@ bot.on(/^\/info$/i, async (msg) => {
     CoinGeckoClient.coins.fetch(symbolID).then((info) => {
       const data = info.data;
       fetchStats().then((apiResp) => {
+        data.macaron_api_price = apiResp.price;
         data.macaron_api_market_cap = apiResp.market_cap;
         data.macaron_api_circulating_market_cap =
           apiResp.circulating_market_cap;
@@ -96,10 +97,10 @@ function formatInfo(info) {
   output += "https://macaronswap.finance\n";
   output += "https://macaronswap.com\n";
   output += "https://coingecko.com/en/coins/" + info.id + "/\n";
-  output += "CoinGecko Rank: " + info.coingecko_rank + "\n\n";
+  output += "https://coinmarketcap.com/currencies/macaronswap/\n\n";
 
   const priceInfo = info.market_data;
-  output += "Price USD: $" + formatNum(priceInfo.current_price.usd) + "\n";
+  output += "Price USD: $" + formatNum(info.macaron_api_price) + "\n";
   output +=
     "Market Cap: $" + formatNumAndTrunc(info.macaron_api_market_cap) + "\n";
   output +=
