@@ -137,7 +137,7 @@ function formatPrice(info) {
   let output = info.name + " (" + info.symbol + ")\n";
 
   output += "\nPrice USD: $" + formatNum(info.price) + "\n";
-  return output + "Price BNB: " + info.price_BNB.substring(0, 8) + "\n";
+  return output + "Price BNB: " + info.priceNative.substring(0, 8) + "\n";
 }
 
 // Check if the cache is valid
