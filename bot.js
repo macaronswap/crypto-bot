@@ -68,7 +68,7 @@ bot.on(/^\/price$/i, async (msg) => {
       asReply: true,
     });
   } else {
-    var info = await fetchStats("https://api.macaronswap.finance/prices?chainId=56");
+    var info = await fetchStats("https://www.macaronswap.finance/api/prices?chainId=56");
     cache[symbolID] = info;
     const address = "0xacb2d47827C9813AE26De80965845D80935afd0B".toLowerCase();
     return msg.reply.text(formatPrice(info.data[address]), { asReply: true });
@@ -77,7 +77,7 @@ bot.on(/^\/price$/i, async (msg) => {
 
 bot.start();
 
-function fetchStats(url = "https://api.macaronswap.finance/stats") {
+function fetchStats(url = "https://www.macaronswap.finance/api/prices?chainId=56") {
   const options = { json: true };
 
   return new Promise((resolve, reject) => {
